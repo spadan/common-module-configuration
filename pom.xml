@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>multi-datasource-starter</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>multi-datasource-starter</name>
+    <description>Demo project for Spring Boot</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.0.3.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <!--发布远程服务器属性-->
+        <host>10.1.5.63</host>
+        <username>publish</username>
+        <password>publish</password>
+        <developer>xiongliang</developer>
+        <appdir>/data/dubbo/${project.build.finalName}</appdir>
+        <restart.script>/data/dubbo/dev-env-deploy/shell/springboot.sh restart ${project.build.finalName}</restart.script>
+        <publish.skip>true</publish.skip>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>3.0.0</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>publish2Linux</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>upload-single</goal>
+                            <goal>sshexec</goal>
+                        </goals>
+                        <configuration>
+                            <!--<serverId>machine63</serverId>-->
+                            <fromFile>target/${project.build.finalName}.jar</fromFile>
+                            <url>scp://${username}:${password}@${host}/${appdir}/${developer}</url>
+                            <!--mkdir -p ${appdir};; rm -f ${app}; ln -s ${name} ${app}; ${restart}-->
+                            <commands>
+                               <!-- <command>cd ${appdir}</command>
+                                <command>rm -f ${project.build.finalName}</command>
+                                <command>ln -s ${developer} ${project.build.finalName}</command>
+                                <command>${restart.script}</command>
+-->
+                                <command>rm -f ${appdir}/${project.build.finalName}</command>
+                                <command>ln -s ${developer} ${appdir}/${project.build.finalName}</command>
+                                <command>/usr/local/java/bin/java -jar ${appdir}/${project.build.finalName}/${project.build.finalName}.jar</command>
+                            </commands>
+                            <displayCommandOutputs>true</displayCommandOutputs>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
