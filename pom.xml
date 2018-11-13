@@ -18,7 +18,13 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <modules>
+        <module>eureka-service</module>
+        <module>order-service</module>
+    </modules>
+
     <properties>
+        <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -28,11 +34,30 @@
         <password>publish</password>
         <developer>xiongliang</developer>
         <appdir>/data/dubbo/${project.build.finalName}</appdir>
-        <restart.script>/data/dubbo/dev-env-deploy/shell/springboot.sh restart ${project.build.finalName}</restart.script>
+        <restart.script>/data/dubbo/dev-env-deploy/shell/springboot.sh restart ${project.build.finalName}
+        </restart.script>
         <publish.skip>true</publish.skip>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>one.util</groupId>
+            <artifactId>streamex</artifactId>
+            <version>0.6.7</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -87,7 +112,36 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+
+        <!--eureka hystrix feign-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -111,7 +165,7 @@
                 <executions>
                     <execution>
                         <id>publish2Linux</id>
-                        <phase>install</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>upload-single</goal>
                             <goal>sshexec</goal>
@@ -122,25 +176,35 @@
                             <url>scp://${username}:${password}@${host}/${appdir}/${developer}</url>
                             <!--mkdir -p ${appdir};; rm -f ${app}; ln -s ${name} ${app}; ${restart}-->
                             <commands>
-                               <!-- <command>cd ${appdir}</command>
-                                <command>rm -f ${project.build.finalName}</command>
-                                <command>ln -s ${developer} ${project.build.finalName}</command>
-                                <command>${restart.script}</command>
--->
+                                <!-- <command>cd ${appdir}</command>
+                                 <command>rm -f ${project.build.finalName}</command>
+                                 <command>ln -s ${developer} ${project.build.finalName}</command>
+                                 <command>${restart.script}</command>
+ -->
                                 <command>rm -f ${appdir}/${project.build.finalName}</command>
                                 <command>ln -s ${developer} ${appdir}/${project.build.finalName}</command>
-                                <command>/usr/local/java/bin/java -jar ${appdir}/${project.build.finalName}/${project.build.finalName}.jar</command>
+                                <command>/usr/local/java/bin/java -jar
+                                    ${appdir}/${project.build.finalName}/${project.build.finalName}.jar
+                                </command>
                             </commands>
                             <displayCommandOutputs>true</displayCommandOutputs>
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 
 </project>
